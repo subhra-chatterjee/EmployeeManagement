@@ -1,0 +1,45 @@
+﻿@page "/employee-list"
+@inherits EmployeeListBase // Inherit the base class logic
+
+<h3>Employee List</h3>
+
+@if (Employees == null || !Employees.Any())
+{
+    <p>No employees found.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Employee ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th>Phone Number</th>
+                <th>Department</th>
+                <th>Position</th>
+                <th>Salary</th>
+                <th>Date of Joining</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var employee in Employees)
+            {
+                <tr>
+                    <td>@employee.EmployeeID</td>
+                    <td>@employee.FirstName</td>
+                    <td>@employee.LastName</td>
+                    <td>@employee.Email</td>
+                    <td>@employee.PhoneNumber</td>
+                    <td>@employee.Department</td>
+                    <td>@employee.Position</td>
+                    <td>@employee.Salary.ToString("C")</td>
+                    <td>@employee.DateOfJoining.ToString("yyyy-MM-dd")</td>
+                    <td>@(employee.IsActive ? "Active" : "Inactive")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
