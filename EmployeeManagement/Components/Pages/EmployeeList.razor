@@ -2,7 +2,12 @@
 @inherits EmployeeListBase // Inherit the base class logic
 
 <h3>Employee List</h3>
-
+<div class="col-md-6">
+    <a href=@($"/addEmployee") class="btn btn-primary" role="button">
+        <i class="fas fa-user-plus"></i>
+        Add Employeee
+    </a>
+</div>
 @if (Employees == null || !Employees.Any())
 {
     <p>No employees found.</p>
@@ -40,8 +45,8 @@ else
                     <td>@employee.DateOfJoining.ToString("yyyy-MM-dd")</td>
                     <td>@(employee.IsActive ? "Active" : "Inactive")</td>
                     <td>
-                        <button class="btn btn-primary btn-sm">View</button>
-                        <button class="btn btn-warning btn-sm">Edit</button>
+                        <a href=@($"/editEmployee/{employee.EmployeeID}") class="btn btn-primary btn-sm">Edit</a>
+                        <a href=@($"/viewEmployee/{employee.EmployeeID}") class="btn btn-primary btn-sm">View</a>
                         <button class="btn btn-danger btn-sm"> Delete</button>
                     </td>
                 </tr>

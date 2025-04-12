@@ -59,14 +59,14 @@ namespace EmployeeWebService.Controllers
                 return NotFound(ex.Message);
             }
         }
-        [HttpPut("{Id}")]
-        public async Task<ActionResult<Employee>> UpdateEmployee(Employee employee,int Id)
+        [HttpPut]
+        public async Task<ActionResult<Employee>> UpdateEmployee(Employee employee)
         {
             try
             {
-                if (employee == null && Id == null)
+                if (employee == null)
                     return BadRequest();
-                var res = await employeeService.UpdateEmployee(employee, Id);
+                var res = await employeeService.UpdateEmployee(employee,employee.EmployeeID);
                 return Ok(res);
 
             }
