@@ -50,5 +50,6 @@ namespace EmployeeManagement.Components.Pages
             Navigation.NavigateTo("/employee-list");
         }
 
+
     }
 }
