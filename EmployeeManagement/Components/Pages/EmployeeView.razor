@@ -1,0 +1,54 @@
+﻿@page "/viewEmployee/{Id:int}"
+@inherits ViewEmployeeBase
+<h3>Employee View</h3>
+
+@if(employee!=null)
+{
+    <div class="form-group">
+		<label>First Name</label>
+		<input class="form-control" value="@employee.FirstName" readonly />
+    </div>
+	<div class="form-group">
+		<label>First Name</label>
+		<input class="form-control" value="@employee.LastName" readonly />
+	</div>
+	<div class="form-group">
+		<label>First Name</label>
+		<input class="form-control" value="@employee.Email" readonly />
+	</div>
+    <div class="form-group">
+        <label>Phone Number</label>
+        <input class="form-control" value="@employee.PhoneNumber" readonly />
+    </div>
+
+    <div class="form-group">
+        <label>Department</label>
+        <input class="form-control" value="@employee.Department" readonly />
+    </div>
+
+    <div class="form-group">
+        <label>Position</label>
+        <input class="form-control" value="@employee.Position" readonly />
+    </div>
+
+    <div class="form-group">
+        <label>Salary</label>
+        <input class="form-control" value="@employee.Salary.ToString("C")" readonly />
+    </div>
+
+    <div class="form-group">
+        <label>Date of Joining</label>
+        <input class="form-control" value="@employee.DateOfJoining.ToShortDateString()" readonly />
+    </div>
+
+    <div class="form-group form-check">
+        <input type="checkbox" class="form-check-input" checked="@employee.IsActive" disabled />
+        <label class="form-check-label">Active</label>
+    </div>
+    <div class="form-group">
+        <a class="btn btn-secondary mt-3" href="@($"/employee-list")">Back</a>
+    </div>
+
+}else{
+	<h1>Loading.....</h1>
+}

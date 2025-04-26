@@ -1,0 +1,74 @@
+﻿@rendermode InteractiveServer
+@page "/addEmployee"
+@page "/editEmployee/{Id:int}"
+@inherits EditEpmloyeeBase
+
+<h3>@Title Employee</h3>
+
+@if (employee != null)
+{
+    <EditForm Model="@employee" OnValidSubmit="HandleValidSubmit" FormName="employeeForm">
+        <DataAnnotationsValidator />
+
+        <div class="form-group">
+            <label for="firstName">First Name</label>
+            <InputText id="firstName" class="form-control" @bind-Value="employee.FirstName" />
+            <ValidationMessage For="@(() => employee.FirstName)" />
+        </div>
+
+        <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <InputText id="lastName" class="form-control" @bind-Value="employee.LastName" />
+            <ValidationMessage For="@(() => employee.LastName)" />
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <InputText id="email" class="form-control" @bind-Value="employee.Email" type="email" />
+            <ValidationMessage For="@(() => employee.Email)" />
+        </div>
+
+        <div class="form-group">
+            <label for="phoneNumber">Phone Number</label>
+            <InputText class="form-control" @bind-Value="employee.PhoneNumber" />
+            <ValidationMessage For="@(() => employee.PhoneNumber)" />
+        </div>
+
+        <div class="form-group">
+            <label for="department">Department</label>
+            <InputText class="form-control" @bind-Value="employee.Department" />
+            <ValidationMessage For="@(() => employee.Department)" />
+        </div>
+
+        <div class="form-group">
+            <label for="position">Position</label>
+            <InputText class="form-control" @bind-Value="employee.Position" />
+            <ValidationMessage For="@(() => employee.Position)" />
+        </div>
+
+        <div class="form-group">
+            <label for="salary">Salary</label>
+            <InputNumber  class="form-control" @bind-Value="employee.Salary" />
+            <ValidationMessage For="@(() => employee.Salary)" />
+        </div>
+
+        <div class="form-group">
+            <label for="dateOfJoining">Date of Joining</label>
+            <InputDate class="form-control" @bind-Value="employee.DateOfJoining" @attributes="dateAttributes" />
+            <ValidationMessage For="@(() => employee.DateOfJoining)" />
+        </div>
+
+        <div class="form-group">
+            <label for="isActive">Active</label>
+            <InputCheckbox class="form-check-input" @bind-Value="employee.IsActive" />
+            <ValidationMessage For="@(() => employee.IsActive)" />
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Submit</button>
+        <a class="btn btn-secondary mt-3" href="@($"/employee-list")">Back</a>
+    </EditForm>
+}
+else
+{
+    <p>Loading...</p>
+}
