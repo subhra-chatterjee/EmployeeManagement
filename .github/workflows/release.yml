@@ -48,6 +48,7 @@ jobs:
         id: check_release
         run: |
           release_exists=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ env.VERSION }} | jq -r '.message')
+          echo "Release exists check result: $release_exists"
           if [[ "$release_exists" != "Not Found" ]]; then
             echo "Release already exists for tag ${{ env.VERSION }}. Skipping release creation."
             echo "release_exists=true" >> $GITHUB_ENV
@@ -59,7 +60,7 @@ jobs:
         if: env.release_exists == 'false'
         run: |
           echo "Creating GitHub release for ${{ env.VERSION }}"
-          curl -X POST \
+          release_response=$(curl -X POST \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
             -d @- https://api.github.com/repos/${{ github.repository }}/releases <<EOF
@@ -71,16 +72,21 @@ jobs:
             "draft": false,
             "prerelease": false
           }
-          EOF
-
+          EOF)
+          echo "Release creation response: $release_response"
+        
       - name: Upload Assets to GitHub Release
         if: env.release_exists == 'false'
         run: |
           echo "Uploading assets to release"
+          release_id=$(echo $release_response | jq -r .id)
+          echo "Release ID: $release_id"
+          
           for file in ./publish/*; do
-            curl -X POST \
+            upload_response=$(curl -X POST \
               -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
               -H "Content-Type: $(file -b --mime-type $file)" \
               --data-binary @"$file" \
-              "https://uploads.github.com/repos/${{ github.repository }}/releases/$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ env.VERSION }} | jq -r .id)/assets?name=$(basename $file)"
+              "https://uploads.github.com/repos/${{ github.repository }}/releases/$release_id/assets?name=$(basename $file)")
+            echo "Upload response for $file: $upload_response"
           done
