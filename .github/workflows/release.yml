@@ -1,9 +1,11 @@
-name: Release .NET Build
+# .github/workflows/auto-release.yml
+
+name: Auto Release on PR Merge
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - master
 
 permissions:
   contents: write
@@ -15,21 +17,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-
-      - name: Restore & Publish
+      - name: Setup Git
         run: |
-          dotnet restore
-          dotnet publish -c Release -o ./publish
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Generate Version (e.g. v1.0.0+commitSHA)
+        id: version
+        run: |
+          VERSION="v1.0.0-$(git rev-parse --short HEAD)"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Generated version: $VERSION"
+
+      - name: Create Git Tag
+        run: |
+          git tag $VERSION
+          git push origin $VERSION
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+
+      - name: Publish Project
+        run: dotnet publish -c Release -o ./publish
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
+          tag_name: ${{ env.VERSION }}
+          name: Release ${{ env.VERSION }}
           files: ./publish/**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
