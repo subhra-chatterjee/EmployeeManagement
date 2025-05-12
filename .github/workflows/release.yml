@@ -1,92 +1,92 @@
-# .github/workflows/auto-release.yml
+# # .github/workflows/auto-release.yml
 
-name: Auto Release on PR Merge
+# name: Auto Release on PR Merge
 
-on:
-  push:
-    branches:
-      - master
+# on:
+#   push:
+#     branches:
+#       - master
 
-permissions:
-  contents: write  # Required to create GitHub releases with GITHUB_TOKEN
+# permissions:
+#   contents: write  # Required to create GitHub releases with GITHUB_TOKEN
 
-jobs:
-  release:
-    runs-on: ubuntu-latest
+# jobs:
+#   release:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v4
+#     steps:
+#       - uses: actions/checkout@v4
 
-      - name: Setup Git
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
+#       - name: Setup Git
+#         run: |
+#           git config user.name "github-actions"
+#           git config user.email "github-actions@github.com"
 
-      - name: Generate Version (e.g. 1.0.0-<short-commit>)
-        id: version
-        run: |
-          VERSION="1.0.0-$(git rev-parse --short HEAD)"
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "Generated version: $VERSION"
+#       - name: Generate Version (e.g. 1.0.0-<short-commit>)
+#         id: version
+#         run: |
+#           VERSION="1.0.0-$(git rev-parse --short HEAD)"
+#           echo "VERSION=$VERSION" >> $GITHUB_ENV
+#           echo "Generated version: $VERSION"
 
-      - name: Create Git Tag
-        run: |
-          git tag $VERSION
-          git push origin $VERSION
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # Use PAT here, not GITHUB_TOKEN
+#       - name: Create Git Tag
+#         run: |
+#           git tag $VERSION
+#           git push origin $VERSION
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # Use PAT here, not GITHUB_TOKEN
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
+#       - name: Setup .NET
+#         uses: actions/setup-dotnet@v4
+#         with:
+#           dotnet-version: '8.0.x'
 
-      - name: Restore & Publish
-        run: dotnet publish -c Release -o ./publish -p:Version=${{ env.VERSION }}
+#       - name: Restore & Publish
+#         run: dotnet publish -c Release -o ./publish -p:Version=${{ env.VERSION }}
 
-      - name: Check if release exists
-        id: check_release
-        run: |
-          release_exists=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ env.VERSION }} | jq -r '.message')
-          echo "Release exists check result: $release_exists"
-          if [[ "$release_exists" != "Not Found" ]]; then
-            echo "Release already exists for tag ${{ env.VERSION }}. Skipping release creation."
-            echo "release_exists=true" >> $GITHUB_ENV
-          else
-            echo "release_exists=false" >> $GITHUB_ENV
-          fi
+#       - name: Check if release exists
+#         id: check_release
+#         run: |
+#           release_exists=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ env.VERSION }} | jq -r '.message')
+#           echo "Release exists check result: $release_exists"
+#           if [[ "$release_exists" != "Not Found" ]]; then
+#             echo "Release already exists for tag ${{ env.VERSION }}. Skipping release creation."
+#             echo "release_exists=true" >> $GITHUB_ENV
+#           else
+#             echo "release_exists=false" >> $GITHUB_ENV
+#           fi
 
-      - name: Create GitHub Release (only if not exists)
-        if: env.release_exists == 'false'
-        run: |
-          echo "Creating GitHub release for ${{ env.VERSION }}"
-          release_response=$(curl -X POST \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            -d @- https://api.github.com/repos/${{ github.repository }}/releases <<EOF
-          {
-            "tag_name": "${{ env.VERSION }}",
-            "target_commitish": "master",
-            "name": "Release ${{ env.VERSION }}",
-            "body": "Release for version ${{ env.VERSION }}",
-            "draft": false,
-            "prerelease": false
-          }
-          EOF)
-          echo "Release creation response: $release_response"
+#       - name: Create GitHub Release (only if not exists)
+#         if: env.release_exists == 'false'
+#         run: |
+#           echo "Creating GitHub release for ${{ env.VERSION }}"
+#           release_response=$(curl -X POST \
+#             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+#             -H "Accept: application/vnd.github.v3+json" \
+#             -d @- https://api.github.com/repos/${{ github.repository }}/releases <<EOF
+#           {
+#             "tag_name": "${{ env.VERSION }}",
+#             "target_commitish": "master",
+#             "name": "Release ${{ env.VERSION }}",
+#             "body": "Release for version ${{ env.VERSION }}",
+#             "draft": false,
+#             "prerelease": false
+#           }
+#           EOF)
+#           echo "Release creation response: $release_response"
         
-      - name: Upload Assets to GitHub Release
-        if: env.release_exists == 'false'
-        run: |
-          echo "Uploading assets to release"
-          release_id=$(echo $release_response | jq -r .id)
-          echo "Release ID: $release_id"
+#       - name: Upload Assets to GitHub Release
+#         if: env.release_exists == 'false'
+#         run: |
+#           echo "Uploading assets to release"
+#           release_id=$(echo $release_response | jq -r .id)
+#           echo "Release ID: $release_id"
           
-          for file in ./publish/*; do
-            upload_response=$(curl -X POST \
-              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-              -H "Content-Type: $(file -b --mime-type $file)" \
-              --data-binary @"$file" \
-              "https://uploads.github.com/repos/${{ github.repository }}/releases/$release_id/assets?name=$(basename $file)")
-            echo "Upload response for $file: $upload_response"
-          done
+#           for file in ./publish/*; do
+#             upload_response=$(curl -X POST \
+#               -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+#               -H "Content-Type: $(file -b --mime-type $file)" \
+#               --data-binary @"$file" \
+#               "https://uploads.github.com/repos/${{ github.repository }}/releases/$release_id/assets?name=$(basename $file)")
+#             echo "Upload response for $file: $upload_response"
+#           done
