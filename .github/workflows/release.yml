@@ -75,18 +75,18 @@ jobs:
           EOF)
           echo "Release creation response: $release_response"
         
-      - name: Upload Assets to GitHub Release
-        if: env.release_exists == 'false'
-        run: |
-          echo "Uploading assets to release"
-          release_id=$(echo $release_response | jq -r .id)
-          echo "Release ID: $release_id"
+      # - name: Upload Assets to GitHub Release
+      #   if: env.release_exists == 'false'
+      #   run: |
+      #     echo "Uploading assets to release"
+      #     release_id=$(echo $release_response | jq -r .id)
+      #     echo "Release ID: $release_id"
           
-          for file in ./publish/*; do
-            upload_response=$(curl -X POST \
-              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-              -H "Content-Type: $(file -b --mime-type $file)" \
-              --data-binary @"$file" \
-              "https://uploads.github.com/repos/${{ github.repository }}/releases/$release_id/assets?name=$(basename $file)")
-            echo "Upload response for $file: $upload_response"
-          done
+      #     for file in ./publish/*; do
+      #       upload_response=$(curl -X POST \
+      #         -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+      #         -H "Content-Type: $(file -b --mime-type $file)" \
+      #         --data-binary @"$file" \
+      #         "https://uploads.github.com/repos/${{ github.repository }}/releases/$release_id/assets?name=$(basename $file)")
+      #       echo "Upload response for $file: $upload_response"
+      #     done
