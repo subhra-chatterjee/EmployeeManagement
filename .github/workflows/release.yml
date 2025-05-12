@@ -44,7 +44,19 @@ jobs:
       - name: Restore & Publish
         run: dotnet publish -c Release -o ./publish -p:Version=${{ env.VERSION }}
 
-      - name: Create GitHub Release
+      - name: Check if release exists
+        id: check_release
+        run: |
+          release_exists=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ env.VERSION }} | jq -r '.message')
+          if [[ "$release_exists" != "Not Found" ]]; then
+            echo "Release already exists for tag ${{ env.VERSION }}. Skipping release creation."
+            echo "release_exists=true" >> $GITHUB_ENV
+          else
+            echo "release_exists=false" >> $GITHUB_ENV
+          fi
+
+      - name: Create GitHub Release (only if not exists)
+        if: env.release_exists == 'false'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.VERSION }}
@@ -52,3 +64,7 @@ jobs:
           files: ./publish/**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Skip release if already exists
+        if: env.release_exists == 'true'
+        run: echo "Release with tag ${{ env.VERSION }} already exists, skipping release upload."
